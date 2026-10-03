@@ -53,9 +53,9 @@ with tab_claim:
             llm, notice = None, None
             api_key = get_api_key()
             if api_key and looks_like_openai_key(api_key):
-                llm = build_llm(api_key, settings.model)        # fresh client, never cached
+                llm = build_llm(api_key, settings.model, settings.provider)  # fresh client, never cached
             elif api_key:
-                notice = "The key you entered does not look like an OpenAI key, so AI drafting was skipped."
+                notice = "The key you entered does not look like a valid API key, so AI drafting was skipped."
             api_key = ""                                        # drop our reference to the secret
 
             try:

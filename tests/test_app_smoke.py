@@ -93,14 +93,14 @@ def _patch_llm(monkeypatch, record):
                 def invoke(_, messages):
                     return Communications(officer_summary="Summary.", claimant_letter="placeholder")
             return R()
-    def fake_build(api_key, model="x"):
+    def fake_build(api_key, model="x", provider="OpenAI"):
         record.append(api_key)
         return Fake()
     monkeypatch.setattr("securecare.agents.llm.build_llm", fake_build)
 
 
 def _key_widgets(at):
-    return [t for t in at.text_input if t.key and t.key.startswith("openai_key_")]
+    return [t for t in at.text_input if t.key and t.key.startswith("llm_key_")]
 
 
 def test_key_is_flushed_after_submit_by_default(monkeypatch):

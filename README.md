@@ -5,7 +5,7 @@ Built as the class project for the *FDE LangGraph* sessions: collect → validat
 
 * Validated form (inline alerts on every field, conditional sections, repeating bill rows)
 * LangGraph workflow: eligibility → calculation → document check → status → AI-drafted letters → verification
-* Optional AI (OpenAI): email autofill + letters. **Works without a key** (template letters)
+* Optional AI (OpenAI or OpenRouter, pick in the sidebar): email autofill + letters. **Works without a key** (template letters)
 * Bring-your-own-key, **never shared between visitors** (see [Key safety](#key-safety))
 
 ## Project structure
@@ -35,11 +35,11 @@ securecare-claims/
 │   │   ├── runner.py            #   runs the graph, captures a node-by-node trace
 │   │   └── visualize.py         #   graph -> Graphviz DOT for the UI
 │   ├── agents/                  # LLM agents
-│   │   ├── llm.py               #   the ONLY place a ChatOpenAI client is created
+│   │   ├── llm.py               #   the ONLY place an LLM client is created (OpenAI, OpenRouter, ...)
 │   │   ├── extractor.py         #   email text -> structured fields
 │   │   └── communicator.py      #   officer summary + claimant letter (+ verification, fallback)
 │   └── ui/                      # Streamlit widgets
-│       ├── sidebar.py           #   API-key box (the key-safety logic lives here)
+│       ├── sidebar.py           #   provider picker + API-key box (the key-safety logic lives here)
 │       ├── form.py              #   claim form bound to session_state
 │       ├── autofill.py          #   "paste your email" feature
 │       ├── results.py           #   result screen
@@ -108,7 +108,8 @@ ephemeral (this app stores nothing), and public apps are visible to anyone with 
 
 ## Key safety
 
-Each visitor types **their own** OpenAI key in the sidebar. Other Streamlit apps leak keys between users
+Each visitor picks a provider (OpenAI or OpenRouter) and types **their own** key for it in the sidebar.
+Other Streamlit apps leak keys between users
 when they do one of these things, and this project avoids all of them:
 
 | Leaky pattern | Why it leaks | What we do instead |

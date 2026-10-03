@@ -27,7 +27,27 @@ DOCUMENT_LABELS: Dict[str, str] = {
 }
 
 # ----------------------------- LLM settings (no secrets here) -----------------------------
-MODEL_OPTIONS = ["gpt-4o-mini", "gpt-4.1-mini", "gpt-4.1-nano"]
+# Every provider here speaks the OpenAI-compatible chat API (base_url=None means OpenAI's own
+# default endpoint), so a single ChatOpenAI client in agents/llm.py can serve all of them.
+LLM_PROVIDERS: Dict[str, Dict[str, Any]] = {
+    "OpenAI": {
+        "base_url": None,
+        "key_placeholder": "sk-...",
+        "models": ["gpt-4o-mini", "gpt-4.1-mini", "gpt-4.1-nano"],
+    },
+    "OpenRouter": {
+        "base_url": "https://openrouter.ai/api/v1",
+        "key_placeholder": "sk-or-...",
+        "models": [
+            "openai/gpt-4o-mini",
+            "anthropic/claude-3.5-sonnet",
+            "meta-llama/llama-3.1-70b-instruct",
+            "google/gemini-flash-1.5",
+        ],
+    },
+}
+DEFAULT_PROVIDER = "OpenAI"
+MODEL_OPTIONS = LLM_PROVIDERS[DEFAULT_PROVIDER]["models"]
 DEFAULT_MODEL = MODEL_OPTIONS[0]
 LLM_TIMEOUT_SECONDS = 30
 MAX_LLM_ATTEMPTS = 2          # bounded retry loop in the graph (draft -> verify -> draft ...)

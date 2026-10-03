@@ -1,4 +1,4 @@
-"""Sidebar: OpenAI key entry + model choice.
+"""Sidebar: LLM provider choice + API key entry + model choice.
 
 HOW THE KEY IS KEPT PRIVATE (the leak you may have seen in other Streamlit apps comes from
 doing one of the things in the 'never' list):
@@ -19,13 +19,14 @@ from dataclasses import dataclass
 
 import streamlit as st
 
-from securecare.config import DEFAULT_MODEL, MODEL_OPTIONS
+from securecare.config import DEFAULT_PROVIDER, LLM_PROVIDERS
 
-KEY_PREFIX = "openai_key_"
+KEY_PREFIX = "llm_key_"
 
 
 @dataclass
 class Settings:
+    provider: str
     model: str
     keep_key: bool
 
@@ -54,10 +55,18 @@ def render_sidebar() -> Settings:
     for stale in [k for k in st.session_state.keys() if k.startswith(KEY_PREFIX) and k != current]:
         del st.session_state[stale]            # make sure no old key survives in this session
 
+    providers = list(LLM_PROVIDERS)
+
     with st.sidebar:
-        st.header("🔐 OpenAI access")
+        st.header("🔐 AI provider access")
+        provider = st.selectbox(
+            "LLM provider", providers, index=providers.index(DEFAULT_PROVIDER), key="llm_provider",
+            help="Choose which service your API key belongs to.",
+        )
+        provider_info = LLM_PROVIDERS[provider]
         st.text_input(
-            "OpenAI API key", type="password", key=current, placeholder="sk-...",
+            f"{provider} API key", type="password", key=current,
+            placeholder=provider_info["key_placeholder"],
             help="Optional. Needed only for AI features: email autofill and AI-drafted letters.",
         )
         keep = st.checkbox(
@@ -65,11 +74,12 @@ def render_sidebar() -> Settings:
             help="Off (recommended): the key is erased right after each AI action.",
         )
         st.button("Clear key now", on_click=flush_api_key, width="stretch")
-        model = st.selectbox("Model", MODEL_OPTIONS, index=MODEL_OPTIONS.index(DEFAULT_MODEL), key="model")
+        model_options = provider_info["models"]
+        model = st.selectbox("Model", model_options, index=0, key=f"model_{provider}")
         st.caption(
             "🔒 Your key exists only in **your** browser session. It is never saved, logged, cached "
             "or shared with other visitors, and it is erased after each use unless you tick *Keep*."
         )
         if not get_api_key():
             st.info("No key? The claim workflow still runs. Letters use templates instead of AI.")
-    return Settings(model=model, keep_key=keep)
+    return Settings(provider=provider, model=model, keep_key=keep)

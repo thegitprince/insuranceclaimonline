@@ -81,14 +81,14 @@ def render_autofill(settings: Settings) -> None:
 
         key = get_api_key()
         if not key:
-            st.warning("Enter your OpenAI API key in the sidebar to use autofill.")
+            st.warning("Enter your API key in the sidebar to use autofill.")
             return
         if not looks_like_openai_key(key):
-            st.error("That does not look like an OpenAI API key (it should start with 'sk-').")
+            st.error("That does not look like a valid API key (it should start with 'sk-').")
             return
         try:
             with st.spinner("Reading your message…"):
-                extraction = extract_claim_from_text(build_llm(key, settings.model), text)
+                extraction = extract_claim_from_text(build_llm(key, settings.model, settings.provider), text)
         except Exception as exc:  # noqa: BLE001
             st.error(f"AI call failed: {redact_secrets(f'{type(exc).__name__}: {exc}')[:250]}")
             return
